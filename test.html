@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="./jasmine/jasmine.css">
+    <script src="./jasmine/jasmine.js" type="text/javascript"></script>
+    <script src="./jasmine/jasmine-html.js" type="text/javascript"></script>
+    <script src="./observer.js"></script>
+
+    <title>Observer test</title>
+</head>
+<body>
+<!--- EXECUTE TESTS --->
+<script>
+    var jasmineEnv = jasmine.getEnv();
+    jasmineEnv.addReporter(new jasmine.HtmlReporter());
+
+    /**
+     * Observable
+     */
+    describe('Observable test -> watch callbacks', function () {
+        var test, collection = [];
+        beforeEach(function () {
+            test = {a: 0, b: 1, c: [1, 2, 3, 4, 5]};
+            test.observe(function (nVal, oVal, name) {
+                collection.push({
+                    nVal: nVal,
+                    oVal: oVal,
+                    name: name
+                });
+            });
+        });
+        /**
+         * Create test
+         * @param config
+         * @param forceInt
+         * @param method
+         */
+        function createTest() {
+            var config, method, args = Array.prototype.slice.call(arguments, 0);
+            config = args.shift();
+            method = args.shift();
+            var message = 'object member {0} collection {1} should be {2}'.replace(/{(\d)}/g, function (match, n) {
+                return config[parseInt(n)];
+            });
+            it(message, function () {
+                var current,
+                        exp,
+                        key = config[0],
+                        name = config[1],
+                        values = config[3],
+                        val = config[2];
+                if (Array.isArray(values)) {
+                    values.forEach(function (val) {
+                        test[key] = val;
+                    });
+                } else if (typeof values === 'function') {
+                    values(test);
+                } else {
+                    test[key] = val;
+                }
+                current = collection.pop();
+
+                if (Array.isArray(current[name])) {
+                    current[name].forEach(function (nVal, index) {
+                        exp = expect(nVal);
+                        if (!method) {
+                            exp.toBe(val[index])
+                        } else {
+                            exp[method](val[index]);
+                        }
+                    });
+                } else {
+                    exp = expect(current[name]);
+                    if (!method) {
+                        exp.toBe(val)
+                    } else {
+                        exp[method](val);
+                    }
+                }
+
+            });
+        }
+
+        // object test
+        createTest(['a', 'nVal', 1]);
+        createTest(['a', 'oVal', 0, [1]]);
+        createTest(['a', 'name', 'a', [1]]);
+        createTest(['a', 'nVal', 2, [1, 2]]);
+        createTest(['a', 'oVal', 1, [1, 2]]);
+        createTest(['a', 'name', 'a', [1, 2]]);
+        createTest(['a', 'nVal', 2, function (test) {
+            test.a = 1;
+            test.a = 2;
+        }]);
+        // object test
+        createTest(['b', 'nVal', 2]);
+        createTest(['b', 'oVal', 1, [2]]);
+        createTest(['b', 'name', 'b', [1]]);
+        createTest(['b', 'nVal', 2, [1, 2]]);
+        createTest(['b', 'oVal', 1, [1, 2]]);
+        createTest(['b', 'name', 'b', [1, 2]]);
+        // array test
+        createTest(['c', 'nVal', [1, 2, 3, 4], function (test) {
+            test.c.pop();
+        }]);
+        createTest(['c', 'nVal', [1, 2, 3], function (test) {
+            test.c.pop();
+            test.c.pop();
+        }]);
+
+
+    });
+    describe('Observable test 2 -> destroy', function () {
+        var test, collection = [];
+        beforeEach(function () {
+            test = {a: 0, b: 1, c: 1};
+            test.observe('a',function (nVal, oVal, name) {
+                collection.push({
+                    nVal: nVal,
+                    oVal: oVal,
+                    name: name
+                });
+            });
+            test.observe('c',function (nVal, oVal, name) {
+                collection.push({
+                    nVal: nVal,
+                    oVal: oVal,
+                    name: name
+                });
+            });
+
+        });
+        it('should be 2 events a,c -> b -> undefined', function () {
+            expect(test.__$$observer__.events.b instanceof Object).toBe(false);
+            expect(test.__$$observer__.events.b).toBe(undefined);
+            expect(test.__$$observer__.events.a instanceof Object).toBe(true);
+            expect(test.__$$observer__.events.c instanceof Object).toBe(true);
+        });
+        it('should be 1 events c -> b -> undefined', function () {
+            test.destroy('a');
+            expect(test.__$$observer__.events.b instanceof Object).toBe(false);
+            expect(test.__$$observer__.events.a).toBe(undefined);
+            expect(test.__$$observer__.events.b).toBe(undefined);
+            expect(test.__$$observer__.events.c instanceof Object).toBe(true);
+        });
+        it('should be 1 events a -> b -> undefined', function () {
+            test.destroy('c');
+            expect(test.__$$observer__.events.b instanceof Object).toBe(false);
+            expect(test.__$$observer__.events.c).toBe(undefined);
+            expect(test.__$$observer__.events.b).toBe(undefined);
+            expect(test.__$$observer__.events.a instanceof Object).toBe(true);
+        });
+    });
+
+    describe('Observable test 2 -> destroy observer and member', function () {
+        var test, collection = [];
+        beforeEach(function () {
+            test = {a: 0, b: 1, c: 1};
+            test.observe(function (nVal, oVal, name) {
+                collection.push({
+                    nVal: nVal,
+                    oVal: oVal,
+                    name: name
+                });
+            });
+
+        });
+        it('should be 3 events a,b,c', function () {
+
+            expect(test.__$$observer__.events.b instanceof Object).toBe(true);
+            expect(test.__$$observer__.events.a instanceof Object).toBe(true);
+            expect(test.__$$observer__.events.c instanceof Object).toBe(true);
+        });
+        it('should be 2 events b,c -> a -> undefined and member is deleted', function () {
+            test.destroy('a', true);
+            expect(test.a).toBe(undefined);
+            expect(test.__$$observer__.events.b instanceof Object).toBe(true);
+            expect(test.__$$observer__.events.c instanceof Object).toBe(true);
+        });
+        it('should be 2 events b,a -> c -> undefined and member is deleted', function () {
+            test.destroy('c', true);
+            expect(test.c).toBe(undefined);
+            expect(test.__$$observer__.events.b instanceof Object).toBe(true);
+            expect(test.__$$observer__.events.a instanceof Object).toBe(true);
+        });
+
+        it('should be 0 events a,b,c and all members should be deleted', function () {
+            test.destroy(true);
+            expect(test.a).toBe(undefined);
+            expect(test.b).toBe(undefined);
+            expect(test.c).toBe(undefined);
+            expect(test.__$$observer__).toBe(undefined);
+        });
+    });
+
+    jasmineEnv.execute();
+</script>
+</body>
+</html>
