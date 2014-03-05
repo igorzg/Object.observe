@@ -84,14 +84,14 @@
             /**
              * Dirty check
              */
-            dirty = function () {
-                getter();
+                dirty = function () {
+                ob[name] = getter();
                 setter(ob[name]);
             },
             /**
              * Loop check
              */
-            loop = function () {
+                loop = function () {
                 var script = document.createElement('script');
                 // this is fired instantly after is rendered
                 // this is real async 0 timeout
@@ -136,7 +136,7 @@
              * is array
              * @type {*}
              */
-                isArray = Array.isArray(this[name]),
+                isArray = Object.prototype.toString.call(this[name]) === '[object Array]',
             /**
              * Mutator
              * @type {string[]}
@@ -156,7 +156,21 @@
                 setter = function (val) {
                 var oVal = observer.getVal(name),
                     nVal = observer.setVal(name, val);
-                observer.trigger(self, name, nVal, oVal);
+
+                if (isIE8) {
+                    if (isArray) {
+                        if (oVal.length !== nVal.length) {
+                            observer.trigger(self, name, nVal, oVal);
+                        }
+                    } else {
+                        if (nVal !== oVal) { // trigger update
+                            observer.trigger(self, name, nVal, oVal);
+                        }
+                    }
+                } else {
+                    observer.trigger(self, name, nVal, oVal);
+                }
+
             };
         /**
          * Set val
@@ -165,7 +179,7 @@
         /**
          * Is array
          */
-        if (isArray) {
+        if (isArray && !isIE8) {
             var value = observer.getVal(name);
             mutators.forEach(function (key) {
                 var method = value[key];
