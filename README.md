@@ -4,6 +4,9 @@ Object.observe
 Object.observe give you possibility to watch the changes of object member or of the whole object it self.
 
 
+---
+[Execute tests link](http://htmlpreview.github.io/?https://github.com/igorzg/Object.observe/blob/master/test.html)
+
 # Usage
 
 ## Create an observer
