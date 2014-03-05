@@ -1,11 +1,14 @@
 /**
  * Object observer
  */
-
-/**
- * Exec
- */
 (function (Object) {
+    /**
+     * Is ie 8 browser
+     */
+    var isIE8 = (function () {
+        return navigator.userAgent.indexOf("MSIE 8") > -1;
+    }());
+
     /**
      * Observer
      * @param key
@@ -64,6 +67,43 @@
             }
             this.events[key].push(callback);
         }
+    }
+    /**
+     * Create IE8 observer
+     * @param ob
+     * @param name
+     * @param setter
+     * @param getter
+     */
+    function createIE8observer(ob, name, setter, getter) {
+        /**
+         * Head
+         * @type {*}
+         */
+        var head = document.getElementsByTagName('head')[0],
+            /**
+             * Dirty check
+             */
+            dirty = function () {
+                getter();
+                setter(ob[name]);
+            },
+            /**
+             * Loop check
+             */
+            loop = function () {
+                var script = document.createElement('script');
+                // this is fired instantly after is rendered
+                // this is real async 0 timeout
+                script.onreadystatechange = function () {
+                    dirty();
+                    head.removeChild(script);
+                    loop();
+                }
+                head.appendChild(script);
+            };
+        /// instant loop
+        loop();
     }
 
     /**
@@ -142,82 +182,102 @@
          * define property
          */
         try {
-            Object.defineProperty(this, name, {
-                get: getter,
-                set: setter,
-                enumerable: true,
-                configurable: true
-            });
+            if (isIE8) {
+                createIE8observer(this, name, setter, getter);
+            } else {
+                Object.defineProperty(this, name, {
+                    get: getter,
+                    set: setter,
+                    enumerable: true,
+                    configurable: true
+                });
+            }
         } catch (e) {
             try {
+                //firefox
                 Object.prototype.__defineGetter__.call(this, name, getter);
                 Object.prototype.__defineSetter__.call(this, name, setter);
             } catch (e2) {
                 throw new Error("Browser don't support getters and setters", [e, e2]);
             }
         }
-    };
+    }
 
     /**
-     * Attach this feature only if observer is not defined
+     * Destroy
+     * @param member
      */
-    if (!Object.prototype.observe) {
-        /**
-         * Destroy
-         * @param member
-         */
-        Object.prototype.destroy = function (member, deleteMember) {
-            if (!(this.__$$observer__ instanceof Observer)) {
-                return false;
+    function destory(member, deleteMember) {
+        if (!(this.__$$observer__ instanceof Observer)) {
+            return false;
+        }
+        var key, val;
+        if (member && !(typeof member === 'boolean')) {
+            if (!deleteMember) {
+                // get the value
+                val = this[member];
             }
-            var key, val;
-            if (member && !(typeof member === 'boolean')) {
+            // destroy the member
+            this.__$$observer__.destroy(this, member);
+            delete this[member];
+            if (!deleteMember) {
+                this[member] = val;
+            }
+        } else {
+            if (typeof member === 'boolean') {
+                deleteMember = member;
+            }
+            delete this.__$$observer__;
+            for (key in this) {
                 if (!deleteMember) {
-                    // get the value
-                    val = this[member];
+                    val = this[key];
                 }
-                // destroy the member
-                this.__$$observer__.destroy(this, member);
-                delete this[member];
+                delete this[key];
                 if (!deleteMember) {
-                    this[member] = val;
+                    this[key] = val;
                 }
-            } else {
-                if (typeof member === 'boolean') {
-                    deleteMember = member;
-                }
-                delete this.__$$observer__;
-                for (key in this) {
-                    if (!deleteMember) {
-                        val = this[key];
-                    }
-                    delete this[key];
-                    if (!deleteMember) {
-                        this[key] = val;
-                    }
 
-                }
             }
         }
-        /**
-         * Observer object
-         */
-        Object.prototype.observe = function (name, callback) {
-            var key;
-            if (typeof name === 'string' && typeof callback === 'function') {
-                createObserver.call(this, name, callback);
-            } else if (typeof name === 'function') {
-                for (key in this) {
-                    if (this.hasOwnProperty(key)) {
-                        this.observe.call(this, key, name);
-                    }
-                }
-            } else {
-                throw new Error('Object.observer is not called correctly parameters are not provided correctly')
-            }
+    }
 
+    /**
+     * Observe
+     * @param name
+     * @param callback
+     */
+    function observe(name, callback) {
+        var key;
+        if (typeof name === 'string' && typeof callback === 'function') {
+            createObserver.call(this, name, callback);
+        } else if (typeof name === 'function') {
+            for (key in this) {
+                if (this.hasOwnProperty(key)) {
+                    observe.call(this, key, name);
+                }
+            }
+        } else {
+            throw new Error('Object.observer is not called correctly parameters are not provided correctly')
         }
 
     }
+
+
+    /**
+     * Observer
+     */
+    Object.observe = function (ob) {
+        var args = Array.prototype.slice.call(arguments, 1);
+        observe.apply(ob, args);
+    }
+    /**
+     * Destroy
+     * @param ob
+     */
+    Object.destroy = function (ob) {
+        var args = Array.prototype.slice.call(arguments, 1);
+        destory.apply(ob, args);
+    }
+
 }(Object));
 

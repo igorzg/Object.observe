@@ -21,7 +21,7 @@
         var test, collection = [];
         beforeEach(function () {
             test = {a: 0, b: 1, c: [1, 2, 3, 4, 5]};
-            test.observe(function (nVal, oVal, name) {
+            Object.observe(test,function (nVal, oVal, name) {
                 collection.push({
                     nVal: nVal,
                     oVal: oVal,
@@ -114,14 +114,14 @@
         var test, collection = [];
         beforeEach(function () {
             test = {a: 0, b: 1, c: 1};
-            test.observe('a',function (nVal, oVal, name) {
+            Object.observe(test,'a',function (nVal, oVal, name) {
                 collection.push({
                     nVal: nVal,
                     oVal: oVal,
                     name: name
                 });
             });
-            test.observe('c',function (nVal, oVal, name) {
+            Object.observe(test,'c',function (nVal, oVal, name) {
                 collection.push({
                     nVal: nVal,
                     oVal: oVal,
@@ -137,14 +137,14 @@
             expect(test.__$$observer__.events.c instanceof Object).toBe(true);
         });
         it('should be 1 events c -> b -> undefined', function () {
-            test.destroy('a');
+            Object.destroy(test,'a');
             expect(test.__$$observer__.events.b instanceof Object).toBe(false);
             expect(test.__$$observer__.events.a).toBe(undefined);
             expect(test.__$$observer__.events.b).toBe(undefined);
             expect(test.__$$observer__.events.c instanceof Object).toBe(true);
         });
         it('should be 1 events a -> b -> undefined', function () {
-            test.destroy('c');
+            Object.destroy(test,'c');
             expect(test.__$$observer__.events.b instanceof Object).toBe(false);
             expect(test.__$$observer__.events.c).toBe(undefined);
             expect(test.__$$observer__.events.b).toBe(undefined);
@@ -156,7 +156,7 @@
         var test, collection = [];
         beforeEach(function () {
             test = {a: 0, b: 1, c: 1};
-            test.observe(function (nVal, oVal, name) {
+            Object.observe(test, function (nVal, oVal, name) {
                 collection.push({
                     nVal: nVal,
                     oVal: oVal,
@@ -172,20 +172,20 @@
             expect(test.__$$observer__.events.c instanceof Object).toBe(true);
         });
         it('should be 2 events b,c -> a -> undefined and member is deleted', function () {
-            test.destroy('a', true);
+            Object.destroy(test, 'a', true);
             expect(test.a).toBe(undefined);
             expect(test.__$$observer__.events.b instanceof Object).toBe(true);
             expect(test.__$$observer__.events.c instanceof Object).toBe(true);
         });
         it('should be 2 events b,a -> c -> undefined and member is deleted', function () {
-            test.destroy('c', true);
+            Object.destroy(test, 'c', true);
             expect(test.c).toBe(undefined);
             expect(test.__$$observer__.events.b instanceof Object).toBe(true);
             expect(test.__$$observer__.events.a instanceof Object).toBe(true);
         });
 
         it('should be 0 events a,b,c and all members should be deleted', function () {
-            test.destroy(true);
+            Object.destroy(test, true);
             expect(test.a).toBe(undefined);
             expect(test.b).toBe(undefined);
             expect(test.c).toBe(undefined);
