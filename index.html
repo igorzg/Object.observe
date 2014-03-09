@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="./observer.js"></script>
+
+    <title>Observer test</title>
+</head>
+<body>
+<!--- EXECUTE TESTS --->
+<script>
+
+    var obj = {a: 0, b: 1, c: [1, 2, 3, 4, 5]};
+    Object.observe(obj,function (nVal, oVal, name) {
+        console.log(nVal, oVal, name)
+    });
+    obj.a = 1;
+    obj.a = 2;
+    delete obj.a;
+    obj.c = [];
+
+    console.log(obj);
+</script>
+</body>
+</html>

@@ -2,12 +2,7 @@
  * Object observer
  */
 (function (Object) {
-    /**
-     * Is ie 8 browser
-     */
-    var isIE8 = (function () {
-        return navigator.userAgent.indexOf("MSIE 8") > -1;
-    }());
+    "use strict";
 
     /**
      * Observer
@@ -68,43 +63,6 @@
             this.events[key].push(callback);
         }
     }
-    /**
-     * Create IE8 observer
-     * @param ob
-     * @param name
-     * @param setter
-     * @param getter
-     */
-    function createIE8observer(ob, name, setter, getter) {
-        /**
-         * Head
-         * @type {*}
-         */
-        var head = document.getElementsByTagName('head')[0],
-            /**
-             * Dirty check
-             */
-                dirty = function () {
-                ob[name] = getter();
-                setter(ob[name]);
-            },
-            /**
-             * Loop check
-             */
-                loop = function () {
-                var script = document.createElement('script');
-                // this is fired instantly after is rendered
-                // this is real async 0 timeout
-                script.onreadystatechange = function () {
-                    dirty();
-                    head.removeChild(script);
-                    loop();
-                }
-                head.appendChild(script);
-            };
-        /// instant loop
-        loop();
-    }
 
     /**
      * Create an observer
@@ -131,46 +89,32 @@
              * Reference
              * @type {Object}
              */
-                self = this,
+            self = this,
             /**
              * is array
              * @type {*}
              */
-                isArray = Object.prototype.toString.call(this[name]) === '[object Array]',
+            isArray = Object.prototype.toString.call(this[name]) === '[object Array]',
             /**
              * Mutator
              * @type {string[]}
              */
-                mutators = ['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'],
+            mutators = ['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'],
             /**
              * Getter
              * @returns {*}
              */
-                getter = function () {
+            getter = function () {
                 return observer.getVal(name);
             },
             /**
              * Setter
              * @param val
              */
-                setter = function (val) {
+            setter = function (val) {
                 var oVal = observer.getVal(name),
                     nVal = observer.setVal(name, val);
-
-                if (isIE8) {
-                    if (isArray) {
-                        if (oVal.length !== nVal.length) {
-                            observer.trigger(self, name, nVal, oVal);
-                        }
-                    } else {
-                        if (nVal !== oVal) { // trigger update
-                            observer.trigger(self, name, nVal, oVal);
-                        }
-                    }
-                } else {
                     observer.trigger(self, name, nVal, oVal);
-                }
-
             };
         /**
          * Set val
@@ -179,7 +123,7 @@
         /**
          * Is array
          */
-        if (isArray && !isIE8) {
+        if (isArray) {
             var value = observer.getVal(name);
             mutators.forEach(function (key) {
                 var method = value[key];
@@ -196,16 +140,12 @@
          * define property
          */
         try {
-            if (isIE8) {
-                createIE8observer(this, name, setter, getter);
-            } else {
-                Object.defineProperty(this, name, {
-                    get: getter,
-                    set: setter,
-                    enumerable: true,
-                    configurable: true
-                });
-            }
+            Object.defineProperty(this, name, {
+                get: getter,
+                set: setter,
+                enumerable: true,
+                configurable: true
+            });
         } catch (e) {
             try {
                 //firefox

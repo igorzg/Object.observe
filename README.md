@@ -32,7 +32,14 @@ Object.destroy(obj, 'a', true); // destroy a observer and delete the object memb
 Don't use delete keyward to delete the object member.
 Eg.
 ```javascript
+// DELETE keyward
 delete obj.a; // observer on a will not be destroyed and you will not get an update
 // instead of delete use an destroy method
 Object.destroy(obj, 'a', true);
+
+// Array issues
+var b = [1,2,3];
+b.length = 0; // this will not receive notification
+b = []; // this will send update
+
 ```
