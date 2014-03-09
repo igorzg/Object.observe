@@ -2,7 +2,10 @@ Object.observe
 ==============
 
 Object.observe give you possibility to watch the changes of object member or of the whole object it self.
-Supported IE9++
+
+---
+Supporting IE9++, ES5 Object.defineProperty is required 
+---
 Removed IE8 since microsoft will stop support for xp in April of 2014
 
 ---
