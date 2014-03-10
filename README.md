@@ -33,7 +33,7 @@ Object.destroy(obj, 'a'); // destroy the a observer
 Object.destroy(obj, 'a', true); // destroy a observer and delete the object member
 ```
 ## Know issues
-Don't use delete keyward to delete the object member.
+Don't use delete keyword to delete the object member.
 Eg.
 ```javascript
 // DELETE keyward
