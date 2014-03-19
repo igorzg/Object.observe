@@ -3,6 +3,11 @@ Object.observe
 
 Object.observe give you possibility to watch the changes of object member or of the whole object it self.
 Supported IE9++
+=======
+
+---
+Supporting IE9++, ES5 Object.defineProperty is required 
+---
 Removed IE8 since microsoft will stop support for xp in April of 2014
 
 ---
@@ -30,7 +35,7 @@ Object.destroy(obj, 'a'); // destroy the a observer
 Object.destroy(obj, 'a', true); // destroy a observer and delete the object member
 ```
 ## Know issues
-Don't use delete keyward to delete the object member.
+Don't use delete keyword to delete the object member.
 Eg.
 ```javascript
 // DELETE keyward
