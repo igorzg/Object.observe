@@ -208,7 +208,7 @@
     function observe(name, callback, exclude) {
         var key;
         if (typeof name === 'string' && typeof callback === 'function') {
-            if (Array.isArray(exclude)) {
+            if (Array.isArray(exclude) && !Array.isArray(this)) {
                 if (exclude.indexOf(name) === -1) {
                     createObserver.call(this, name, callback);
                 }
