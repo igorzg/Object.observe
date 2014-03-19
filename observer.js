@@ -3,7 +3,11 @@
  */
 (function (Object) {
     "use strict";
-
+    /**
+     * Observer key
+     * @type {string}
+     */
+    var oKey = '__$$observer__';
     /**
      * Observer
      * @param key
@@ -73,18 +77,18 @@
         /**
          * Observer
          */
-        if (!this.__$$observer__) {
-            this.__$$observer__ = new Observer();
+        if (!this[oKey]) {
+            this[oKey] = new Observer();
         }
         /**
          * add
          */
-        this.__$$observer__.add(name, callback);
+        this[oKey].add(name, callback);
         /**
          * Observer
          * @type {Observer|*}
          */
-        var observer = this.__$$observer__,
+        var observer = this[oKey],
             /**
              * Reference
              * @type {Object}
@@ -162,7 +166,7 @@
      * @param member
      */
     function destory(member, deleteMember) {
-        if (!(this.__$$observer__ instanceof Observer)) {
+        if (!(this[oKey] instanceof Observer)) {
             return false;
         }
         var key, val;
@@ -172,7 +176,7 @@
                 val = this[member];
             }
             // destroy the member
-            this.__$$observer__.destroy(this, member);
+            this[oKey].destroy(this, member);
             delete this[member];
             if (!deleteMember) {
                 this[member] = val;
@@ -181,7 +185,7 @@
             if (typeof member === 'boolean') {
                 deleteMember = member;
             }
-            delete this.__$$observer__;
+            delete this[oKey];
             for (key in this) {
                 if (!deleteMember) {
                     val = this[key];
@@ -196,18 +200,25 @@
     }
 
     /**
-     * Observe
+     * Don't observe values in exclude
      * @param name
      * @param callback
+     * @param exclude Array of keys
      */
-    function observe(name, callback) {
+    function observe(name, callback, exclude) {
         var key;
         if (typeof name === 'string' && typeof callback === 'function') {
-            createObserver.call(this, name, callback);
+            if (Array.isArray(exclude)) {
+                if (exclude.indexOf(name) === -1) {
+                    createObserver.call(this, name, callback);
+                }
+            } else {
+                createObserver.call(this, name, callback);
+            }
         } else if (typeof name === 'function') {
             for (key in this) {
-                if (this.hasOwnProperty(key)) {
-                    observe.call(this, key, name);
+                if (this.hasOwnProperty(key) && key !== oKey) {
+                    observe.call(this, key, name, callback);
                 }
             }
         } else {
