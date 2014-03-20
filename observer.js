@@ -7,7 +7,18 @@
      * Observer key
      * @type {string}
      */
-    var oKey = '__$$observer__';
+    var
+        /**
+         * Guid
+         * @returns {*|string}
+         */
+            guid = function() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = Math.random() * 16 | 0,
+                    v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            })
+        };
     /**
      * Observer
      * @param key
@@ -77,58 +88,60 @@
         /**
          * Observer
          */
-        if (!this[oKey]) {
-            this[oKey] = new Observer();
+        if (!this.hasOwnProperty(this.___$guid___)) {
+            this[this.___$guid___] = new Observer();
         }
         /**
          * add
          */
-        this[oKey].add(name, callback);
+        this[this.___$guid___].add(name, callback);
+
         /**
          * Observer
          * @type {Observer|*}
          */
-        var observer = this[oKey],
+        var observer = this[this.___$guid___],
             /**
              * Reference
              * @type {Object}
              */
-            self = this,
+                self = this,
             /**
              * is array
              * @type {*}
              */
-            isArray = Object.prototype.toString.call(this[name]) === '[object Array]',
+                isArray = Object.prototype.toString.call(this[name]) === '[object Array]',
             /**
              * Mutator
              * @type {string[]}
              */
-            mutators = ['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'],
+                mutators = ['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'],
+            value,
             /**
              * Getter
              * @returns {*}
              */
-            getter = function () {
+                getter = function () {
                 return observer.getVal(name);
             },
             /**
              * Setter
              * @param val
              */
-            setter = function (val) {
+                setter = function (val) {
                 var oVal = observer.getVal(name),
                     nVal = observer.setVal(name, val);
-                    observer.trigger(self, name, nVal, oVal);
+                observer.trigger(self, name, nVal, oVal);
             };
         /**
          * Set val
          */
         observer.setVal(name, this[name]);
+        value = observer.getVal(name);
         /**
          * Is array
          */
         if (isArray) {
-            var value = observer.getVal(name);
             mutators.forEach(function (key) {
                 var method = value[key];
                 value[key] = function () {
@@ -151,13 +164,7 @@
                 configurable: true
             });
         } catch (e) {
-            try {
-                //firefox
-                Object.prototype.__defineGetter__.call(this, name, getter);
-                Object.prototype.__defineSetter__.call(this, name, setter);
-            } catch (e2) {
-                throw new Error("Browser don't support getters and setters", [e, e2]);
-            }
+            throw new Error(e);
         }
     }
 
@@ -166,35 +173,37 @@
      * @param member
      */
     function destory(member, deleteMember) {
-        if (!(this[oKey] instanceof Observer)) {
-            return false;
-        }
-        var key, val;
-        if (member && !(typeof member === 'boolean')) {
-            if (!deleteMember) {
-                // get the value
-                val = this[member];
+        if (this.hasOwnProperty(this.___$guid___)) {
+            if (!(this[this.___$guid___] instanceof Observer)) {
+                return false;
             }
-            // destroy the member
-            this[oKey].destroy(this, member);
-            delete this[member];
-            if (!deleteMember) {
-                this[member] = val;
-            }
-        } else {
-            if (typeof member === 'boolean') {
-                deleteMember = member;
-            }
-            delete this[oKey];
-            for (key in this) {
+            var key, val;
+            if (member && !(typeof member === 'boolean')) {
                 if (!deleteMember) {
-                    val = this[key];
+                    // get the value
+                    val = this[member];
                 }
-                delete this[key];
+                // destroy the member
+                this[this.___$guid___].destroy(this, member);
+                delete this[member];
                 if (!deleteMember) {
-                    this[key] = val;
+                    this[member] = val;
                 }
+            } else {
+                if (typeof member === 'boolean') {
+                    deleteMember = member;
+                }
+                delete this[this.___$guid___];
+                for (key in this) {
+                    if (!deleteMember) {
+                        val = this[key];
+                    }
+                    delete this[key];
+                    if (!deleteMember) {
+                        this[key] = val;
+                    }
 
+                }
             }
         }
     }
@@ -217,7 +226,7 @@
             }
         } else if (typeof name === 'function') {
             for (key in this) {
-                if (this.hasOwnProperty(key) && key !== oKey) {
+                if (this.hasOwnProperty(key) && key !== '___$guid___') {
                     observe.call(this, key, name, callback);
                 }
             }
@@ -232,7 +241,12 @@
      * Observer
      */
     Object.observe = function (ob) {
-        var args = Array.prototype.slice.call(arguments, 1);
+        var args;
+        if (!ob.hasOwnProperty('___$guid___')) {
+            ob.___$guid___ = '$observer-' + guid();
+        }
+
+        args = Array.prototype.slice.call(arguments, 1);
         observe.apply(ob, args);
     }
     /**
@@ -240,9 +254,11 @@
      * @param ob
      */
     Object.destroy = function (ob) {
-        var args = Array.prototype.slice.call(arguments, 1);
-        destory.apply(ob, args);
+        var args;
+        if (ob.hasOwnProperty('___$guid___')) {
+            args = Array.prototype.slice.call(arguments, 1);
+            destory.apply(ob, args);
+        }
     }
 
 }(Object));
-
