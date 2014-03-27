@@ -7,18 +7,14 @@
      * Observer key
      * @type {string}
      */
-    var
-        /**
-         * Guid
-         * @returns {*|string}
-         */
-            guid = function() {
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                var r = Math.random() * 16 | 0,
-                    v = c === 'x' ? r : (r & 0x3 | 0x8);
-                return v.toString(16);
-            })
-        };
+    var guid = function () {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0,
+                v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        })
+    };
+
     /**
      * Observer
      * @param key
@@ -221,9 +217,9 @@
                 if (exclude.indexOf(name) === -1) {
                     createObserver.call(this, name, callback);
                 }
-            } else if(typeof this === "object"){
+            } else if (typeof this === "object") {
                 createObserver.call(this, name, callback);
-            } else if(Array.isArray(this)) {
+            } else if (Array.isArray(this)) {
                 console.log('Currently arrays are not supported');
             }
         } else if (typeof name === 'function') {
