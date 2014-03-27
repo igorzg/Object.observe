@@ -7,7 +7,7 @@
      * Observer key
      * @type {string}
      */
-    var guid = function () {
+    function guid() {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
             var r = Math.random() * 16 | 0,
                 v = c === 'x' ? r : (r & 0x3 | 0x8);
@@ -217,17 +217,20 @@
                 if (exclude.indexOf(name) === -1) {
                     createObserver.call(this, name, callback);
                 }
-            } else if (typeof this === "object") {
+            } else {
                 createObserver.call(this, name, callback);
-            } else if (Array.isArray(this)) {
-                console.log('Currently arrays are not supported');
             }
         } else if (typeof name === 'function') {
-            for (key in this) {
-                if (this.hasOwnProperty(key) && key !== '___$guid___') {
-                    observe.call(this, key, name, callback);
+            if (Array.isArray(this)) {
+                console.log('Currently arrays are not supported');
+            } else {
+                for (key in this) {
+                    if (this.hasOwnProperty(key) && key !== '___$guid___') {
+                        observe.call(this, key, name, callback);
+                    }
                 }
             }
+
         } else {
             throw new Error('Object.observer is not called correctly parameters are not provided correctly')
         }
