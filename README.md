@@ -10,6 +10,10 @@ Supporting IE9++, ES5 Object.defineProperty is required
 ---
 Removed IE8 since microsoft will stop support for xp in April of 2014
 
+NEXT
+___
+Update observer to support only array type. Current only array as member of object is supported.
+
 ---
 [Execute tests link](http://htmlpreview.github.io/?https://github.com/igorzg/Object.observe/blob/master/test.html)
 

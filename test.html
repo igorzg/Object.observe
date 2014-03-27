@@ -131,24 +131,25 @@
 
         });
         it('should be 2 events a,c -> b -> undefined', function () {
-            expect(test.__$$observer__.events.b instanceof Object).toBe(false);
-            expect(test.__$$observer__.events.b).toBe(undefined);
-            expect(test.__$$observer__.events.a instanceof Object).toBe(true);
-            expect(test.__$$observer__.events.c instanceof Object).toBe(true);
+            console.log('test', test);
+            expect(test[test.___$guid___].events.b instanceof Object).toBe(false);
+            expect(test[test.___$guid___].events.b).toBe(undefined);
+            expect(test[test.___$guid___].events.a instanceof Object).toBe(true);
+            expect(test[test.___$guid___].events.c instanceof Object).toBe(true);
         });
         it('should be 1 events c -> b -> undefined', function () {
             Object.destroy(test,'a');
-            expect(test.__$$observer__.events.b instanceof Object).toBe(false);
-            expect(test.__$$observer__.events.a).toBe(undefined);
-            expect(test.__$$observer__.events.b).toBe(undefined);
-            expect(test.__$$observer__.events.c instanceof Object).toBe(true);
+            expect(test[test.___$guid___].events.b instanceof Object).toBe(false);
+            expect(test[test.___$guid___].events.a).toBe(undefined);
+            expect(test[test.___$guid___].events.b).toBe(undefined);
+            expect(test[test.___$guid___].events.c instanceof Object).toBe(true);
         });
         it('should be 1 events a -> b -> undefined', function () {
             Object.destroy(test,'c');
-            expect(test.__$$observer__.events.b instanceof Object).toBe(false);
-            expect(test.__$$observer__.events.c).toBe(undefined);
-            expect(test.__$$observer__.events.b).toBe(undefined);
-            expect(test.__$$observer__.events.a instanceof Object).toBe(true);
+            expect(test[test.___$guid___].events.b instanceof Object).toBe(false);
+            expect(test[test.___$guid___].events.c).toBe(undefined);
+            expect(test[test.___$guid___].events.b).toBe(undefined);
+            expect(test[test.___$guid___].events.a instanceof Object).toBe(true);
         });
     });
 
@@ -167,21 +168,22 @@
         });
         it('should be 3 events a,b,c', function () {
 
-            expect(test.__$$observer__.events.b instanceof Object).toBe(true);
-            expect(test.__$$observer__.events.a instanceof Object).toBe(true);
-            expect(test.__$$observer__.events.c instanceof Object).toBe(true);
+            expect(test[test.___$guid___].events.b instanceof Object).toBe(true);
+            expect(test[test.___$guid___].events.a instanceof Object).toBe(true);
+            expect(test[test.___$guid___].events.c instanceof Object).toBe(true);
         });
         it('should be 2 events b,c -> a -> undefined and member is deleted', function () {
             Object.destroy(test, 'a', true);
             expect(test.a).toBe(undefined);
-            expect(test.__$$observer__.events.b instanceof Object).toBe(true);
-            expect(test.__$$observer__.events.c instanceof Object).toBe(true);
+            expect(test[test.___$guid___].events.b instanceof Object).toBe(true);
+            expect(test[test.___$guid___].events.c instanceof Object).toBe(true);
         });
         it('should be 2 events b,a -> c -> undefined and member is deleted', function () {
+
             Object.destroy(test, 'c', true);
             expect(test.c).toBe(undefined);
-            expect(test.__$$observer__.events.b instanceof Object).toBe(true);
-            expect(test.__$$observer__.events.a instanceof Object).toBe(true);
+            expect(test[test.___$guid___].events.b instanceof Object).toBe(true);
+            expect(test[test.___$guid___].events.a instanceof Object).toBe(true);
         });
 
         it('should be 0 events a,b,c and all members should be deleted', function () {

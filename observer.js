@@ -105,30 +105,30 @@
              * Reference
              * @type {Object}
              */
-                self = this,
+            self = this,
             /**
              * is array
              * @type {*}
              */
-                isArray = Object.prototype.toString.call(this[name]) === '[object Array]',
+            isArray = Array.isArray(this[name]),
             /**
              * Mutator
              * @type {string[]}
              */
-                mutators = ['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'],
+            mutators = ['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'],
             value,
             /**
              * Getter
              * @returns {*}
              */
-                getter = function () {
+            getter = function () {
                 return observer.getVal(name);
             },
             /**
              * Setter
              * @param val
              */
-                setter = function (val) {
+            setter = function (val) {
                 var oVal = observer.getVal(name),
                     nVal = observer.setVal(name, val);
                 observer.trigger(self, name, nVal, oVal);
@@ -221,8 +221,10 @@
                 if (exclude.indexOf(name) === -1) {
                     createObserver.call(this, name, callback);
                 }
-            } else {
+            } else if(typeof this === "object"){
                 createObserver.call(this, name, callback);
+            } else if(Array.isArray(this)) {
+                console.log('Currently arrays are not supported');
             }
         } else if (typeof name === 'function') {
             for (key in this) {
@@ -245,7 +247,6 @@
         if (!ob.hasOwnProperty('___$guid___')) {
             ob.___$guid___ = '$observer-' + guid();
         }
-
         args = Array.prototype.slice.call(arguments, 1);
         observe.apply(ob, args);
     }
